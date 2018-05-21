@@ -415,43 +415,28 @@
 
 
     
-        <section class="youyan" id="comments">
+        <section id="comments">
+    <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+    <script>
+		var cloudTieConfig = {
+			url: document.location.href, 
+			sourceId: "",
+			productKey: "38f9a1b707b74b5fbf789af91b7e8f63",
+			target: "cloud-tie-wrapper"
+		};
+	</script>
     <script>
         var loadComment = function(){
             var d = document, s = d.createElement('script');
-            s.src = 'http://v2.uyan.cc/code/uyan.js?uid=2132586';
+            s.src = "https://img1.cache.netease.com/f2e/tie/yun/sdk/loader.js";
             (d.head || d.body).appendChild(s);
         }
     </script>
     
-    <aside class="comment-bar">
-        <a href="javascript:void(0);">
-            <i class="fa fa-commenting-o animated infinite pulse"></i>
-            <i class="fa fa-spinner fa-pulse"></i>
-            <span class="count-comment"></span>
-        </a>
-    </aside>
-    <script>
-        var $commentBar = $("#comments aside.comment-bar");
-        var load$hide = function(){
-            $commentBar.find("a > i").toggle();
-            loadComment();
-            $commentBar.fadeOut(800);
-        }
-        $commentBar.click(function(){
-            load$hide();
-        })
-        $commentBar.children("a").hover(function(){
-            load$hide();
-        })
-        if (window.location.hash === "#comments") {
-            load$hide();
-        }
-    </script>
+    <script> loadComment(); </script>
 
-    <div id="uyan_frame"></div>
 </section>
-    
+	
 
 
 
