@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="mayongnan" />
+
+
+
+<meta name="description" content="介绍了在Android中如何获取运行时注解元素信息">
+<meta name="keywords" content="Android Annotation,RetentionPolicy.RUNTIME,运行时注解">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Annotation系列之运行时注解使用">
+<meta property="og:url" content="http://mayongnan.github.io/2017/01/25/annotation_runtime/index.html">
+<meta property="og:site_name" content="yon&#39;s blog">
+<meta property="og:description" content="介绍了在Android中如何获取运行时注解元素信息">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-05-21T02:17:44.020Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Annotation系列之运行时注解使用">
+<meta name="twitter:description" content="介绍了在Android中如何获取运行时注解元素信息">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="yon&#39;s blog" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.ico">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>Annotation系列之运行时注解使用 | yon&#39;s blog</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">mayongnan</a></h1>
+        </hgroup>
+
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:myskyn@163.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/mayongnan" title="GitHub"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Activity回收/">Activity回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Android-Annotation/">Android Annotation</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Annotations/">Annotations</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fragment复用/">Fragment复用</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github-Blog/">Github Blog</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MVC/">MVC</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MVP/">MVP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MVVM/">MVVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RetentionPolicy-CLASS/">RetentionPolicy.CLASS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RetentionPolicy-RUNTIME/">RetentionPolicy.RUNTIME</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RetentionPolicy-SOURCE/">RetentionPolicy.SOURCE</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/微信分享/">微信分享</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/源码级注解/">源码级注解</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/编译时注解/">编译时注解</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运行时注解/">运行时注解</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/长图分享/">长图分享</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">Android Developer</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">mayongnan</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">mayongnan</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:myskyn@163.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/mayongnan" title="GitHub"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-annotation_runtime" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2017/01/25/annotation_runtime/" class="article-date">
+      <time datetime="2017-01-25T02:17:19.000Z" itemprop="datePublished">2017-01-25</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Annotation系列之运行时注解使用
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/技术随记/">技术随记</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android-Annotation/">Android Annotation</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/RetentionPolicy-RUNTIME/">RetentionPolicy.RUNTIME</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/运行时注解/">运行时注解</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>运行时注解（<code>RetentionPolicy.RUNTIME</code>）会被JVM保留，因此我们在代码运行过程中我们可以对类中使用的运行时注解信息进行获取和处理，运行时注解一般和动态代理配合使用，当然我们也可以利用反射根据注解信息对注解的对象进行相关使用。我们比较熟悉的网络库<a href="https://github.com/square/retrofit" target="_blank" rel="noopener">Retrofit</a>就是通过定义了一系列运行时注解，在程序运行期间根据相应Service接口生成<code>动态代理类</code>，执行方法时会将Service接口方法中声明的注解信息转化成一个HTTP Call并进行相应的请求、数据解析及回调处理。</p>
+<p>本篇将着重于描述如何获取动态注解信息，我们将定义一个运行时注解，类似<a href="http://jakewharton.github.io/butterknife/" target="_blank" rel="noopener">Butter Knife</a>的功能（Butter Knife使用的是编译时注解，在下一篇文章中探讨），只要使用注解就可以省去<code>findViewById</code>相关重复性代码（注：代码仅用于示例，因为反射的性能问题等并不具有使用价值）。</p>
+<h2 id="1-定义注解"><a href="#1-定义注解" class="headerlink" title="1. 定义注解"></a>1. 定义注解</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//声明注解范围为成员变量</span></span><br><span class="line"><span class="meta">@Target</span>(ElementType.FIELD)</span><br><span class="line"><span class="comment">//声明注解为运行时注解</span></span><br><span class="line"><span class="meta">@Retention</span>(RetentionPolicy.RUNTIME)</span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> FindViewById &#123;</span><br><span class="line">    <span class="comment">//定义一个int类型的元素</span></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">value</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="2-编写注解处理工具类"><a href="#2-编写注解处理工具类" class="headerlink" title="2. 编写注解处理工具类"></a>2. 编写注解处理工具类</h2><p>在这里我们需要了解下<a href="http://docs.oracle.com/javase/8/docs/api/" target="_blank" rel="noopener">AnnotatedElement</a>接口，其在<code>java.lang.reflect</code>包中，代表当前运行在VM中的程序的一个注解元素，<code>AnnotatedElement</code>接口允许注解信息被反射读取。该接口的方法中返回的注解信息都是不可变和可序列化的。该接口方法返回的数据可以被调用者修改而不影响返回给其他调用者的数组信息。我们在反射中用到的 <code>Class</code>, <code>Constructor</code>,  <code>Field</code>, <code>Method</code>, <code>Parameter</code>等都是实现了<code>AnnotatedElement</code>接口，因此都可以通过<code>AnnotatedElement</code>接口中定义的方法获取到这些元素上面的注解信息。这里列出常用几个常用方法：</p>
+<p>➣ <code>&lt;T extends Annotation&gt; T getAnnotation(Class&lt;T&gt; annotationClass)</code>: 返回该程序元素上存在的、指定类型的注解，如果该类型注解不存在，则返回null。</p>
+<p>➣ <code>Annotation[] getAnnotations()</code>:返回该程序元素上存在的所有注解。</p>
+<p>➣ <code>Annotation[] getDeclaredAnnotations()</code>：返回直接存在于此元素上的所有注解。与接口中的其他方法不同，该方法将忽略继承的注解。（如果没有注释直接存在于此元素上，则返回长度为零的一个数组）该方法的调用者可以随意修改返回的数组，不会对其他调用者返回的数组产生任何影响。</p>
+<p>示例代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//为了简单演示，我们的工具类只针对Activity进行处理</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ViewInjector</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//为了简单演示，我们的工具类只针对Activity进行处理</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">inject</span><span class="params">(<span class="keyword">final</span> Activity target)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//收集当前Activity及父类Activity中Field信息（防止遗漏父类中使用的注解）</span></span><br><span class="line">        Class targetClass = target.getClass();</span><br><span class="line">        List&lt;Field&gt; fieldList = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">while</span> (targetClass != <span class="keyword">null</span>) &#123;</span><br><span class="line">            Field[] fields = targetClass.getDeclaredFields();</span><br><span class="line">            Collections.addAll(fieldList, fields);</span><br><span class="line">            targetClass = targetClass.getSuperclass();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (Field field : fieldList) &#123;</span><br><span class="line">            <span class="comment">//获取@FindViewById注解的成员变量</span></span><br><span class="line">            FindViewById annotation = field.getAnnotation(FindViewById.class);</span><br><span class="line">            <span class="keyword">if</span> (annotation != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    field.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">                    <span class="comment">//通过findViewById找到对应View并为View变量反射赋值</span></span><br><span class="line">                    field.set(target, target.findViewById(annotation.value()));</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"can't find view by id :"</span> + annotation.value());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="3-使用注解及工具类"><a href="#3-使用注解及工具类" class="headerlink" title="3. 使用注解及工具类"></a>3. 使用注解及工具类</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@FindViewById</span>(R.id.btn_sign_in)</span><br><span class="line">    <span class="keyword">private</span> Button mSubmitBtn;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">        <span class="comment">//使用工具类解析注解信息并赋值</span></span><br><span class="line">        ViewInjector.inject(<span class="keyword">this</span>);</span><br><span class="line">        <span class="comment">//mSubmitBtn将会指向@FindViewById中id对应的View</span></span><br><span class="line">        Toast.makeText(<span class="keyword">this</span>,<span class="string">"mSubmitBtn:"</span>+mSubmitBtn,Toast.LENGTH_SHORT).show();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>类似我们可以通过反射获取到方法中的注解信息，就像刚开始提到的，我们只需要学会注解信息的获取方式即可，Demo源码详见<a href="https://github.com/mayongnan/RetentionPolicy" target="_blank" rel="noopener">关于三种注解类型的示例Demo</a>。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2017/01/25/annotation_runtime/">Annotation系列之运行时注解使用</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">mayongnan</a></p>
+        <p><span>发布时间:</span>2017-01-25, 10:17:19</p>
+        <p><span>最后更新:</span>2018-05-21, 10:17:44</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2017/01/25/annotation_runtime/" title="Annotation系列之运行时注解使用">http://mayongnan.github.io/2017/01/25/annotation_runtime/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://mayongnan.github.io/2017/01/25/annotation_runtime/　　作者: mayongnan" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2017/01/26/annotation_class/">
+                    Annotation系列之编译时注解使用
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2017/01/24/annotation_source/">
+                    Annotation系列之源码级注解使用
+                </a>
+            </div>
+        
+    </nav>
+
+  
+  
+    
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-定义注解"><span class="toc-text">1. 定义注解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-编写注解处理工具类"><span class="toc-text">2. 编写注解处理工具类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-使用注解及工具类"><span class="toc-text">3. 使用注解及工具类</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"Annotation系列之运行时注解使用　| yon's blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+      <div class="duoshuo" id="comments">
+    <div id="comment-box" ></div>
+    <div class="ds-thread" id="ds-thread" data-thread-key="2017/01/25/annotation_runtime/" data-title="Annotation系列之运行时注解使用" data-url="http://mayongnan.github.io/2017/01/25/annotation_runtime/"></div>
+    <script>
+        var duoshuoQuery = {short_name:"mayongnan"};
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+            s.async = true; s.charset = 'UTF-8';
+            (d.head || d.body).appendChild(s);
+        }
+
+        
+    </script>
+    
+    <script> loadComment(); </script>
+
+</div>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2017/01/26/annotation_class/" title="上一篇: Annotation系列之编译时注解使用">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2017/01/24/annotation_source/" title="下一篇: Annotation系列之源码级注解使用">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/23/wechat_share_defact/">Android微信图片分享踩坑记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/16/mvc_mvp_mvvm/">Android中的MVC/MVP/MVVM框架模式</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/26/annotation_class/">Annotation系列之编译时注解使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/25/annotation_runtime/">Annotation系列之运行时注解使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/24/annotation_source/">Annotation系列之源码级注解使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/23/annotation_basic/">Annotation系列之基础篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/30/fragment_restore/">如何复用FragmentActivity被系统杀掉之前所保存的Fragment</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/05/hello_blog/">使用Hexo搭建Github博客</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2018 mayongnan
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

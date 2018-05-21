@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="mayongnan" />
+
+
+
+<meta name="description" content="介绍Activity在被系统强制销毁的情况下，Fragment的restore过程及探讨Fragment在此过程中的复用问题">
+<meta name="keywords" content="Activity回收,Fragment复用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何复用FragmentActivity被系统杀掉之前所保存的Fragment">
+<meta property="og:url" content="http://mayongnan.github.io/2016/12/30/fragment_restore/index.html">
+<meta property="og:site_name" content="yon&#39;s blog">
+<meta property="og:description" content="介绍Activity在被系统强制销毁的情况下，Fragment的restore过程及探讨Fragment在此过程中的复用问题">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-05-21T02:17:44.021Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何复用FragmentActivity被系统杀掉之前所保存的Fragment">
+<meta name="twitter:description" content="介绍Activity在被系统强制销毁的情况下，Fragment的restore过程及探讨Fragment在此过程中的复用问题">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="yon&#39;s blog" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.ico">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>如何复用FragmentActivity被系统杀掉之前所保存的Fragment | yon&#39;s blog</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">mayongnan</a></h1>
+        </hgroup>
+
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:myskyn@163.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/mayongnan" title="GitHub"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Activity回收/">Activity回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Android-Annotation/">Android Annotation</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Annotations/">Annotations</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fragment复用/">Fragment复用</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github-Blog/">Github Blog</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MVC/">MVC</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MVP/">MVP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MVVM/">MVVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RetentionPolicy-CLASS/">RetentionPolicy.CLASS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RetentionPolicy-RUNTIME/">RetentionPolicy.RUNTIME</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RetentionPolicy-SOURCE/">RetentionPolicy.SOURCE</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/微信分享/">微信分享</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/源码级注解/">源码级注解</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/编译时注解/">编译时注解</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运行时注解/">运行时注解</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/长图分享/">长图分享</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">Android Developer</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">mayongnan</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">mayongnan</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:myskyn@163.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/mayongnan" title="GitHub"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-fragment_restore" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/12/30/fragment_restore/" class="article-date">
+      <time datetime="2016-12-30T05:31:19.000Z" itemprop="datePublished">2016-12-30</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      如何复用FragmentActivity被系统杀掉之前所保存的Fragment
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/开发随记/">开发随记</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Activity回收/">Activity回收</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Fragment复用/">Fragment复用</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <blockquote>
+<p>当一个Activity执行了<code>onStop()</code>、Android 3.0之前执行<code>onPause()</code>方法时，将会被系统标记为<code>Killable</code>，在系统处于<code>extreme low memory</code> 的情况下，处于<code>Killable</code>状态的Activity将极有可能会被系统从内存释放（If an activity is paused or stopped,the system can drop the activity from memory by either asking it to finish, or simply killing its process） —— <a href="https://developer.android.google.cn/reference/android/app/Activity.html" target="_blank" rel="noopener">Activity API</a></p>
+</blockquote>
+<h2 id="默认情况下Fragment的restore过程"><a href="#默认情况下Fragment的restore过程" class="headerlink" title="默认情况下Fragment的restore过程"></a><strong>默认情况下Fragment的<code>restore</code>过程</strong></h2><p>➣当系统认为一个Activity处于Killable状态时会调用<code>Activity#onSaveInstanceState(Bundle outState)</code>方法进行数据的保存，Android3.0之前该方法的执行时机为：<code>onResume → onSaveInstanceState →onPause</code>，即调用onPause()之前；Android3.0之后：<code>onPause →onSaveInstanceState→ onStop</code>，即调用onStop()之前。<br>➣FragmentActivity的<code>onSaveInstanceState(Bundle outState)</code> 中会记录所有Fragment状态信息，源码如下：</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onSaveInstanceState</span><span class="params">(Bundle outState)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.onSaveInstanceState(outState);</span><br><span class="line">    Parcelable p = mFragments.saveAllState();</span><br><span class="line">    <span class="keyword">if</span> (p != <span class="keyword">null</span>) &#123;</span><br><span class="line">        outState.putParcelable(FRAGMENTS_TAG, p);</span><br><span class="line">        &#125;</span><br><span class="line">    ......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>➣当用户重新回到被Killed的FragmentActivity时，Activity将会被重新创建，并进行之前<code>onSaveInstanceState(Bundle outState)</code>保存数据的<code>restore</code>过程，在<code>FragmentActivity#onCreate(Bundle savedInstanceState)</code>方法中会根据之前保存的Fragment状态信息进行Fragment的恢复（重新创建之前Activity中存在的所有Fragment），源码如下：</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(@Nullable Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">      ......</span><br><span class="line">         <span class="keyword">if</span> (savedInstanceState != <span class="keyword">null</span>) &#123;</span><br><span class="line">              Parcelable p = savedInstanceState.getParcelable(FRAGMENTS_TAG);</span><br><span class="line">              mFragments.restoreAllState(p, nc != <span class="keyword">null</span> ? nc.fragments : <span class="keyword">null</span>);</span><br><span class="line">              ......</span><br><span class="line">          &#125;</span><br><span class="line">      mFragments.dispatchCreate();</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+<p>➣<code>restore</code>过程恢复的“旧”的Fragment将会随着Activity生命周期方法（<code>onStart</code>、<code>onResume</code>）的执行而执行相应的Fragment生命周期方法(<code>onCreateView</code>、<code>onActivityCreated</code>、<code>onResume</code>等)，从而完成Fragment的完整创建。如果我们在Activity中未做针对性处理，有时重新回到一个Activity的时候会出现<code>Fragment重叠</code>、自定义View功能失效甚至直接<code>Crash</code>等情况。</p>
+<h2 id="如何简单有效的处理restore带来的问题"><a href="#如何简单有效的处理restore带来的问题" class="headerlink" title="如何简单有效的处理restore带来的问题"></a><strong>如何简单有效的处理<code>restore</code>带来的问题</strong></h2><p>&emsp;&emsp;正常情况下，restore过程带来的问题，根源是由于Activity在恢复之前“旧”的Fragment的同时，我们又重新创建新的Fragment导致的，也就是说此时Activity存在两份职责功能完全重复的Fragment，针对这个问题其实我们只需要注释掉Activity中保存Fragment状态的代码，让Activity在被Killed之前不去保存Fragment信息，那样在<code>FragmentActivity#onCreate(Bundle savedInstanceState)</code>方法中便无法进行相应的<code>restore</code>处理，也就是说“旧”的Fragment都将不复存在，界面只会显示我们新创建的Fragment，注释的具体代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onSaveInstanceState</span><span class="params">(Bundle outState)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//super.onSaveInstanceState(outState);</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="如何复用restore产生的Fragment"><a href="#如何复用restore产生的Fragment" class="headerlink" title="如何复用restore产生的Fragment"></a><strong>如何复用<code>restore</code>产生的Fragment</strong></h2><p>&emsp;&emsp;注释掉代码的方式固然简单粗暴，但也牺牲了程序执行效率，以及可能带来较差的用户体验（用户可能看到短暂的黑屏现象）。Fragment的重新创建肯定没有复用来的高效，而且注释代码的方式也阻止了其它视图状态的保存。</p>
+<h3 id="1-add-replace方式显示的Fragment"><a href="#1-add-replace方式显示的Fragment" class="headerlink" title="1. add/replace方式显示的Fragment"></a>1. add/replace方式显示的Fragment</h3><p><strong>&emsp;&emsp;对于普通的add/replace方式显示的Fragment，在Activity中可以在初始化之前根据<code>tag</code>使用<code>FragmentManager#findFragmentByTag</code>判断是否已经存在，代码如下：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Fragment中用Fragment#getChildFragmentManager()</span></span><br><span class="line">Fragment aFragment = getSupportFragmentManager().findFragmentByTag(<span class="string">"标识Fragment的Tag"</span>);</span><br><span class="line"><span class="keyword">if</span> (aFragment == <span class="keyword">null</span>) &#123;</span><br><span class="line">    aFragment=<span class="keyword">new</span> FragmentA();</span><br><span class="line">    Bundle args = <span class="keyword">new</span> Bundle();</span><br><span class="line">    args.putString(<span class="string">"参数名"</span>, <span class="string">"参数值"</span>);</span><br><span class="line">    <span class="comment">//setArguments方法只能在attach到Activity之前调用</span></span><br><span class="line">    aFragment.setArguments(args);</span><br><span class="line">    <span class="comment">//同一个Fragment实例只能被add一次</span></span><br><span class="line">    getSupportFragmentManager().beginTransaction().</span><br><span class="line">                    add(R.id.container, aFragment,<span class="string">"标识Fragment的Tag"</span>).</span><br><span class="line">                    commitAllowingStateLoss();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-ViewPager-FragmentPagerAdapter"><a href="#2-ViewPager-FragmentPagerAdapter" class="headerlink" title="2. ViewPager+FragmentPagerAdapter"></a>2. ViewPager+FragmentPagerAdapter</h3><p><strong>&emsp;&emsp;在使用ViewPager嵌套Fragment的情况下，情况会和普通add/replace方式添加的Fragment有所不同，如果我们使用的是<code>FragmentPagerAdapter</code>，其在<code>instantiateItem</code>方法中会先通过tag查找Fragment,如果Fragment不存在，在add时会自动添加tag，源码如下：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> Object <span class="title">instantiateItem</span><span class="params">(ViewGroup container, <span class="keyword">int</span> position)</span> </span>&#123;</span><br><span class="line">       ......</span><br><span class="line">       <span class="comment">// Do we already have this fragment?</span></span><br><span class="line">       String name = makeFragmentName(container.getId(), itemId);</span><br><span class="line">       <span class="comment">//1、在instantiateItem中，因为是根据findFragmentByTag来确定fragment是否已经存在，所以在Activity的restore过程中虽然我们重新初始化了FragmentPagerAdapter中引用的Fragment[]，但是实际上ViewPager中最先用到的还是被Kill之前的FragmentManager中已有的Fragment（见下面注释2），如果FragmentManager中不存在，才会通过getItem(position)去获取Fragment[]中的Fragment</span></span><br><span class="line">       <span class="comment">//2、ViewPager#onSaveInstanceState()中会保存当前ViewPager选中的位置，在onRestoreInstanceState()中如果mAdapter不为null将会定位到保存的位置</span></span><br><span class="line">       Fragment fragment = mFragmentManager.findFragmentByTag(name);</span><br><span class="line">       <span class="keyword">if</span> (fragment != <span class="keyword">null</span>) &#123;</span><br><span class="line">           mCurTransaction.attach(fragment);</span><br><span class="line">       &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">           fragment = getItem(position);</span><br><span class="line">           <span class="comment">//add的Fragment的tag名称格式为："android:switcher:" + container.getId() + ":" + getItemId(position);如：android:switcher:2131758535:0</span></span><br><span class="line"></span><br><span class="line">           mCurTransaction.add(container.getId(), fragment,</span><br><span class="line">                   makeFragmentName(container.getId(), itemId));</span><br><span class="line">       &#125;</span><br><span class="line">       ......</span><br><span class="line">       <span class="keyword">return</span> fragment;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p><strong>&emsp;这种情况下，我们需要如何复用呢？分如下两种情况：</strong></p>
+<h4 id="➣Activity与Fragment不需要进行交互"><a href="#➣Activity与Fragment不需要进行交互" class="headerlink" title="➣Activity与Fragment不需要进行交互"></a><strong>➣Activity与Fragment不需要进行交互</strong></h4><p>&emsp;&emsp;在Activity与Fragment不需要进行交互的情况下，我们不需要保持ViewPager中所显示Fragment的引用，只需要在<code>Adapter#getItem(int position)</code> 根据<code>position</code>直接返回创建的Fragment实例即可，具体原因在上述<code>FragmentPagerAdapter#instantiateItem()</code>方法中可以很清楚看到：restore过程中产生的fragment，ViewPager会直接利用，只有在当前初始化位置的<code>Fragment==null</code>时才会通过<code>getItem(position)</code>获取，因此可以在Adapter中使用如下方法初始化Fragment（<a href="https://developer.android.google.cn/reference/android/support/v4/app/FragmentPagerAdapter.html" target="_blank" rel="noopener">FragmentPagerAdapter</a>的example中使用的是类似的方式）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">MyPageAdapter</span> <span class="keyword">extends</span> <span class="title">FragmentPagerAdapter</span> </span>&#123;</span><br><span class="line">    ......</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Fragment <span class="title">getItem</span><span class="params">(<span class="keyword">int</span> position)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">switch</span> (position) &#123;</span><br><span class="line">            <span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">                <span class="keyword">return</span> Fragment0.newInstance(args);</span><br><span class="line">            <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">return</span> Fragment1.newInstance(args);</span><br><span class="line">            <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">                <span class="keyword">return</span> Fragment2.newInstance(args);</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="keyword">return</span> Fragment0.newInstance(args);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="➣Activity与Fragment需要进行交互"><a href="#➣Activity与Fragment需要进行交互" class="headerlink" title="➣Activity与Fragment需要进行交互"></a><strong>➣Activity与Fragment需要进行交互</strong></h4><p>&emsp;&emsp; 如果我们在Activity中<strong>必须</strong>保持对ViewPager中显示的Fragment的直接引用，如TitleBar中有个刷新按钮（<em>仅从开发实际情况中选取示例，其实同样可以从FragmentManager中获取到，原则上是能不保持引用最好不保持</em>），我们需要实现点击按钮来刷新ViewPager当前的界面，就可以全局声明一个Fragment数组，来保持对ViewPager中用到的每个Fragment的引用，以便控制刷新。这种情况下在Activity中，我们需要对restore产生的Fragment进行查找和引用，示例代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> </span>&#123;</span><br><span class="line">	    <span class="keyword">private</span> <span class="keyword">final</span> String KEY_TAGS = <span class="string">"viewpager_fragment_tags"</span>;</span><br><span class="line">	    <span class="keyword">private</span> MyPageAdapter mPageAdapter;</span><br><span class="line">	    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> PAGE_COUNT = <span class="number">3</span>;</span><br><span class="line">    <span class="comment">//当Activity需要与具体的Fragment交互时（如TitleBar中有个刷新按钮）可能需要保持对ViewPager中Fragments的引用</span></span><br><span class="line">	    <span class="keyword">private</span> Fragment[] fragments = <span class="keyword">new</span> Fragment[PAGE_COUNT];</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">        ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);</span><br><span class="line">        <span class="keyword">if</span> (savedInstanceState == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">//第一次初始化的情况下直接创建</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; PAGE_COUNT; i++) &#123;</span><br><span class="line">                fragments[i] = getFragment(i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">//根据保存的tag信息，复用restore产生的Fragment</span></span><br><span class="line">            String[] tags = savedInstanceState.getStringArray(KEY_TAGS);</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; PAGE_COUNT; i++) &#123;</span><br><span class="line">                fragments[i] = getFragmentWithTags(i, tags);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        mPageAdapter = <span class="keyword">new</span> MyPageAdapter(getSupportFragmentManager(), fragments);</span><br><span class="line">        viewPager.setAdapter(mPageAdapter);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 根据保存的tag信息，复用restore过程中产生的Fragment，Fragment不存在时直接创建</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> position 要初始化Fragment的位置</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> tags     &#123;<span class="doctag">@link</span> #onSaveInstanceState&#125;中保存的ViewPager中Fragment的Tag信息</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> FragmentManager中已有的Fragment或new出来的Fragment实例</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> Fragment <span class="title">getFragmentWithTags</span><span class="params">(<span class="keyword">int</span> position, String[] tags)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (tags == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> getFragment(position);</span><br><span class="line">        &#125;</span><br><span class="line">        FragmentManager fragmentManager = getSupportFragmentManager();</span><br><span class="line">        <span class="keyword">if</span> (tags[position] != <span class="keyword">null</span>) &#123;</span><br><span class="line">            Fragment targetFragment = fragmentManager.findFragmentByTag(tags[position]);</span><br><span class="line">            <span class="keyword">return</span> targetFragment == <span class="keyword">null</span> ? getFragment(position) : targetFragment;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> getFragment(position);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> Fragment <span class="title">getFragment</span><span class="params">(<span class="keyword">int</span> position)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">switch</span> (position) &#123;</span><br><span class="line">            <span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> Fragment0();</span><br><span class="line">            <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> Fragment1();</span><br><span class="line">            <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> Fragment2();</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> Fragment0();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onSaveInstanceState</span><span class="params">(Bundle outState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onSaveInstanceState(outState);</span><br><span class="line">        outState.putStringArray(KEY_TAGS, mPageAdapter.getInstantiateTags());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onResume</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onResume();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">MyPageAdapter</span> <span class="keyword">extends</span> <span class="title">FragmentPagerAdapter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> String[] mFragmentTags;</span><br><span class="line">        <span class="keyword">private</span> Fragment[] mFragments = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">MyPageAdapter</span><span class="params">(FragmentManager mFragmentManager, @NonNull Fragment[] fragments)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">super</span>(mFragmentManager);</span><br><span class="line">            <span class="keyword">this</span>.mFragments = fragments;</span><br><span class="line">            mFragmentTags = <span class="keyword">new</span> String[mFragments.length];</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getCount</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> mFragments.length;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Fragment <span class="title">getItem</span><span class="params">(<span class="keyword">int</span> position)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> mFragments[position];</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Object <span class="title">instantiateItem</span><span class="params">(ViewGroup container, <span class="keyword">int</span> position)</span> </span>&#123;</span><br><span class="line">            Fragment fragment = (Fragment) <span class="keyword">super</span>.instantiateItem(container, position);</span><br><span class="line">            <span class="comment">//因为父类（FragmentPagerAdapter）是在本方法中为Fragment设置tag，所以我们在此方法中进行tag保存</span></span><br><span class="line">            mFragmentTags[position] = fragment.getTag();</span><br><span class="line">            <span class="keyword">return</span> fragment;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 获取实例化的ItemFragment设置的tag</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">         * <span class="doctag">@return</span> 与 &#123;<span class="doctag">@link</span> #PAGE_COUNT&#125;对应长度的tag数组</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">public</span> String[] getInstantiateTags() &#123;</span><br><span class="line">            <span class="keyword">return</span> mFragmentTags;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-ViewPager-FragmentStatePagerAdapter"><a href="#3-ViewPager-FragmentStatePagerAdapter" class="headerlink" title="3. ViewPager+FragmentStatePagerAdapter"></a>3. ViewPager+FragmentStatePagerAdapter</h3><p><strong>&emsp;&emsp;如果使用的是<code>FragmentStatePagerAdapter</code>，其与<code>FragmentPagerAdapter</code>也不同，<code>FragmentStatePagerAdapter</code>本身进行了状态的保存（<code>#restoreState(Parcelable state, ClassLoader loader)</code>）和恢复（<code>#saveState()</code>）处理，如果我们不需要保持ViewPager中所显示Fragment的引用，只需像<code>FragmentPagerAdapter</code>一样在<code>getItem(int position)</code>中直接return相应的Fragment对象即可；若</strong>必须<strong>要保持所显示Fragment的引用，可以通过反射的方式在初始化时反射为<code>Fragment#mTag</code>赋值，在初始化前同样根据<code>findFragmentByTag</code>判断是否已经存在。当然，特殊必要的情况下，我们可以不使用底层原有的保存机制，在研究透彻的基础上，自己编码进行Fragment列表及相关数据的保存</strong></p>
+<h3 id="4-addToBackStack"><a href="#4-addToBackStack" class="headerlink" title="4. addToBackStack"></a>4. addToBackStack</h3><p><strong>&emsp;&emsp;在使用<code>FragmentTransaction#addToBackStack(String name)</code>将Fragment加入回退栈的情况下，由于在<code>FragmentActivity#onSaveInstanceState(Bundle outState)</code>方法中为所有Fragment都保存了状态信息（Saves the state for all Fragments），正常restore过程中也会将之前的Fragment的Stack状态恢复，如果没有特殊需要，正常情况下系统会帮我们恢复到之前显示的状态，不需要做特殊处理。</strong>（<a href="https://github.com/mayongnan/RestoreFragment.git" target="_blank" rel="noopener">Demo源码</a>）</p>
+<p>需要注意的是，此篇文章主要探讨的是在FragmentActivity被系统强制销毁的情况下Fragment的恢复和复用问题，如果是一个复杂Activity被销毁，我们想回到销毁之前一模一样的状态，还需要处理Activity中View的内容、位置、状态等一些复杂信息的保存和恢复。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/12/30/fragment_restore/">如何复用FragmentActivity被系统杀掉之前所保存的Fragment</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">mayongnan</a></p>
+        <p><span>发布时间:</span>2016-12-30, 13:31:19</p>
+        <p><span>最后更新:</span>2018-05-21, 10:17:44</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/12/30/fragment_restore/" title="如何复用FragmentActivity被系统杀掉之前所保存的Fragment">http://mayongnan.github.io/2016/12/30/fragment_restore/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://mayongnan.github.io/2016/12/30/fragment_restore/　　作者: mayongnan" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2017/01/23/annotation_basic/">
+                    Annotation系列之基础篇
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2016/05/05/hello_blog/">
+                    使用Hexo搭建Github博客
+                </a>
+            </div>
+        
+    </nav>
+
+  
+  
+    
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#默认情况下Fragment的restore过程"><span class="toc-text">默认情况下Fragment的restore过程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何简单有效的处理restore带来的问题"><span class="toc-text">如何简单有效的处理restore带来的问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何复用restore产生的Fragment"><span class="toc-text">如何复用restore产生的Fragment</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-add-replace方式显示的Fragment"><span class="toc-text">1. add/replace方式显示的Fragment</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-ViewPager-FragmentPagerAdapter"><span class="toc-text">2. ViewPager+FragmentPagerAdapter</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#➣Activity与Fragment不需要进行交互"><span class="toc-text">➣Activity与Fragment不需要进行交互</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#➣Activity与Fragment需要进行交互"><span class="toc-text">➣Activity与Fragment需要进行交互</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-ViewPager-FragmentStatePagerAdapter"><span class="toc-text">3. ViewPager+FragmentStatePagerAdapter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-addToBackStack"><span class="toc-text">4. addToBackStack</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"如何复用FragmentActivity被系统杀掉之前所保存的Fragment　| yon's blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+      <div class="duoshuo" id="comments">
+    <div id="comment-box" ></div>
+    <div class="ds-thread" id="ds-thread" data-thread-key="2016/12/30/fragment_restore/" data-title="如何复用FragmentActivity被系统杀掉之前所保存的Fragment" data-url="http://mayongnan.github.io/2016/12/30/fragment_restore/"></div>
+    <script>
+        var duoshuoQuery = {short_name:"mayongnan"};
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+            s.async = true; s.charset = 'UTF-8';
+            (d.head || d.body).appendChild(s);
+        }
+
+        
+    </script>
+    
+    <script> loadComment(); </script>
+
+</div>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2017/01/23/annotation_basic/" title="上一篇: Annotation系列之基础篇">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2016/05/05/hello_blog/" title="下一篇: 使用Hexo搭建Github博客">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/23/wechat_share_defact/">Android微信图片分享踩坑记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/16/mvc_mvp_mvvm/">Android中的MVC/MVP/MVVM框架模式</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/26/annotation_class/">Annotation系列之编译时注解使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/25/annotation_runtime/">Annotation系列之运行时注解使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/24/annotation_source/">Annotation系列之源码级注解使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/23/annotation_basic/">Annotation系列之基础篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/30/fragment_restore/">如何复用FragmentActivity被系统杀掉之前所保存的Fragment</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/05/hello_blog/">使用Hexo搭建Github博客</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2018 mayongnan
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="mayongnan" />
+
+
+
+<meta name="description" content="一张清晰的长图，通过微信API图片路径分享给好友，会出现模糊，可以先保存到本地，保存在本地的图片清晰度更高">
+<meta name="keywords" content="微信分享,长图分享">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android微信图片分享踩坑记录">
+<meta property="og:url" content="http://mayongnan.github.io/2017/05/23/wechat_share_defact/index.html">
+<meta property="og:site_name" content="yon&#39;s blog">
+<meta property="og:description" content="一张清晰的长图，通过微信API图片路径分享给好友，会出现模糊，可以先保存到本地，保存在本地的图片清晰度更高">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-05-21T02:17:44.022Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android微信图片分享踩坑记录">
+<meta name="twitter:description" content="一张清晰的长图，通过微信API图片路径分享给好友，会出现模糊，可以先保存到本地，保存在本地的图片清晰度更高">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="yon&#39;s blog" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.ico">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>Android微信图片分享踩坑记录 | yon&#39;s blog</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">mayongnan</a></h1>
+        </hgroup>
+
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:myskyn@163.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/mayongnan" title="GitHub"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Activity回收/">Activity回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Android-Annotation/">Android Annotation</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Annotations/">Annotations</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fragment复用/">Fragment复用</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github-Blog/">Github Blog</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MVC/">MVC</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MVP/">MVP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MVVM/">MVVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RetentionPolicy-CLASS/">RetentionPolicy.CLASS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RetentionPolicy-RUNTIME/">RetentionPolicy.RUNTIME</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RetentionPolicy-SOURCE/">RetentionPolicy.SOURCE</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/微信分享/">微信分享</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/源码级注解/">源码级注解</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/编译时注解/">编译时注解</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运行时注解/">运行时注解</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/长图分享/">长图分享</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">Android Developer</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">mayongnan</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">mayongnan</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:myskyn@163.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/mayongnan" title="GitHub"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-wechat_share_defact" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2017/05/23/wechat_share_defact/" class="article-date">
+      <time datetime="2017-05-23T09:00:00.000Z" itemprop="datePublished">2017-05-23</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android微信图片分享踩坑记录
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/开发随记/">开发随记</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/微信分享/">微信分享</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/长图分享/">长图分享</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>最近接手了一个“图片分享给微信好友清晰度优化”的任务，心想，这还不小菜一碟。首先看了下需求：公司app有个将界面生成一张长图片并支持微信分享的功能。正常来讲，分享的图片不清晰应该和图片压缩有关系，可是事实并非想象的那么简单，我们项目中的这个功能是先生成长图并保存到本地，之后直接调用微信分享API，通过传递本地路径的方式实现的。项目中图片生成相关代码本身并没有什么问题，保存到本地的图片是很清晰的，可是为什么分享出去的图片变模糊了？</p>
+<h2 id="分析研究"><a href="#分析研究" class="headerlink" title="分析研究"></a>分析研究</h2><p>笔者对微信分享图片相关内容进行了一些研究。这里对测试过程中用到的手机和图片进行如下说明：</p>
+<p>➣ 发送方手机均使用的Redmi Note4，5.5英寸分辨率为1920x1080</p>
+<p>➣ 接收方（好友）手机均使用的三星GALAXY Note 3 Lite（N7508V/移动4G），5.5英寸分辨率为1280x720</p>
+<p>➣ 截图规格：1080x1920px，263.32kb，png格式</p>
+<p>➣ 生成图规格：1080x6596px，441.21kb，jpg格式（先根据Activity中显示的View，利用view.draw(canvas)绘制到使用Bitmap.Config.RGB_565色彩模式的Bitmap上，质量压缩30%，然后通过FileOutputStream输出保存图片）</p>
+<h3 id="使用微信API进行分享"><a href="#使用微信API进行分享" class="headerlink" title="使用微信API进行分享"></a>使用微信API进行分享</h3><p>使用微信API进行分享，有两种方式，一种是发送图片的二进制数据，一种是发送图片的路径，具体可以参考<a href="https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&amp;t=resource/res_list&amp;verify=1&amp;id=open1419317340&amp;token=&amp;lang=zh_CN" target="_blank" rel="noopener">微信开放平台</a>。或者直接下载<a href="https://res.wx.qq.com/open/zh_CN/htmledition/res/dev/download/sdk/WeChatSDK_sample_Android_5.0.2.rar" target="_blank" rel="noopener">范例代码</a>。</p>
+<h4 id="1-发送图片的二进制数据"><a href="#1-发送图片的二进制数据" class="headerlink" title="1. 发送图片的二进制数据"></a>1. 发送图片的二进制数据</h4><p>使用图片的二进制数据进行分享，微信分享的SDK中默认会对Bitmap进行85%的质量压缩，而且微信的Demo中还对Bitmap进行了尺寸压缩（限制图片尺寸），最后是将图片转换成字节数组（byte[]）调用分享API进行的分享。</p>
+<p>此种方式适合小图分享，发送出去的图片效果和我们最终处理之后的图片应该基本一致，笔者未做对比测试，其实无论使用那种方式进行微信图片分享，都会通过Intent启动微信的一个Activity（分享界面），对于这种方式，需要我们注意最终传递的字节数组的大小，不然很有可能发生<a href="https://developer.android.google.cn/reference/android/os/TransactionTooLargeException.html" target="_blank" rel="noopener">TransactionTooLargeException</a>。</p>
+<h4 id="2-发送图片的本地路径"><a href="#2-发送图片的本地路径" class="headerlink" title="2. 发送图片的本地路径"></a>2. 发送图片的本地路径</h4><p>此种方式也是我们app中使用的图片分享方式，微信Demo中还传递了一个缩略图（thumbData字节数组长度限制在32k以内），主要用于微信好友选择界面，笔者发现如果不传缩略图，依然可以进行分享，比如我们直接分享一个长图，在微信好友选择界面看到的缩略图会以长图的中心为中心进行相应截取。</p>
+<p><strong>发送1080x1920px，263.32kb截图</strong></p>
+<p>发送到朋友圈：从发送方朋友圈看图片清晰度明显发生变化，从发送方微信朋友圈保存到本地，图片变为720x1280px，96.45k，从好友朋友圈保存到本地，图片变为720x1280px，92.27k，<strong>微信保存的图片均为jpg格式，以下不再做说明</strong>。</p>
+<p>发送给好友：从发送方朋友圈看图片清晰度明显发生变化，从发送方微信朋友圈保存到本地，图片变为540x960px，244.38k，从好友朋友圈保存到本地，图片变为540x960px，238.65k。</p>
+<p><strong>发送1080x6596px，441.21kb生成图</strong></p>
+<p>发送到朋友圈：从发送方朋友圈看图片清晰度没有变化，从发送方微信朋友圈保存到本地，图片和原图一致，为1080x6596px，441.21k，从好友朋友圈保存到本地，图片变为1080x6596px，596.02k。</p>
+<p>发送给好友：从发送方朋友圈看图片明显模糊了很多，但是从发送方微信朋友圈保存到本地，图片仍为1080x6596px，441.21k，在好友微信对话中查看也是非常模糊的，从好友朋友圈保存到本地，图片变为1080x6596px，430.87k。</p>
+<p>由此可见，通过本地路径的分享方式，还是蛮坑的，对于普通图片进行分享，无论发送给好友还是分享到朋友圈，都会经过尺寸压缩，而且分享到朋友圈和分享给好友的压缩策略也不同。对于特殊图片（应该是图片尺寸比较大的，笔者试过1080x1920px，2.8M的图片进行测试，效果和“普通图片”结果类似，都会被按相同尺寸压缩），如笔者使用的生成图，在发送方，在发送成功之后，删除发送方本地的图片，再查看发送的记录，会出现“图片已过期或已被清理”，但朋友圈中的记录不受影响，而且保存到本地的文件和原图一模一样。对于我们的app来讲，因为发送的是长图，分享到朋友圈基本上没什么大问题，最大的坑就是分享给好友，好友在聊天记录中点开图片看到的是不清楚的，好在保存到本地之后是清晰的，可是谁会这样操作呢？所以微信的图片显示功能还是有待优化的。分析到这，笔者也已死心，笔者之前还好奇“大智慧”app中的图片分享为什么不模糊，反编译其代码才知道，“大智慧”app用的是“发送图片的二进制数据”的分享方式，真是心大。</p>
+<h3 id="使用系统自带分享功能"><a href="#使用系统自带分享功能" class="headerlink" title="使用系统自带分享功能"></a>使用系统自带分享功能</h3><p>这里提一下系统分享，Android系统中一般都自带分享功能，使用系统自带的文件浏览工具，打开SD卡中的一张图片，或者直接使用“相册”选中一张图片，找到“发送”功能，并点击“发送”，系统便会将所有支持图片发送功能的app列出来供我们选择，这里选择微信或者朋友圈，就可以将图片发送给微信好友或者分享到朋友圈。</p>
+<p>此种方式本质上和通过如下代码调起系统分享类似：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Intent shareIntent = <span class="keyword">new</span> Intent();</span><br><span class="line">shareIntent.setAction(Intent.ACTION_SEND);</span><br><span class="line">shareIntent.putExtra(Intent.EXTRA_STREAM, imageUri);</span><br><span class="line">shareIntent.setType(<span class="string">"image/*"</span>);</span><br><span class="line">startActivity(Intent.createChooser(shareIntent, <span class="string">"分享到"</span>));</span><br></pre></td></tr></table></figure></p>
+<p>使用该方式分享到朋友圈的图片大小与原图相同，质量看不出差别；该方式分享给微信好友，发送的图片一般会被压缩，一些特殊的图片，像长图，在接收方可以选择“查看原图”，但是这里“查看原图”的大小与发送的原图所占磁盘空间是不同的。</p>
+<p><strong>发送1080x1920px，263.32kb的截图</strong></p>
+<p>发送到朋友圈：从发送方朋友圈看图片清晰度明显发生变化，从发送方微信朋友圈保存到本地，图片变为720x1280px，96.45k，从好友朋友圈保存到本地，图片变为720*1280px，92.27k。</p>
+<p>发送给好友：从发送方朋友圈看图片清晰度明显发生变化，从发送方微信朋友圈保存到本地，图片变为720x1280px，107.57k，从好友朋友圈保存到本地，图片变为720*1280px，105.05k。</p>
+<p><strong>发送1080x6596px，441.21kb的生成图</strong></p>
+<p>发送到朋友圈：从发送方朋友圈看图片清晰度没有变化，从发送方微信朋友圈保存到本地，图片变为1080x6596px，441.21k，从好友朋友圈保存到本地，图片变为1080x6596px，596.02k。</p>
+<p>发送给好友：从发送方朋友圈看图片清晰度没有变化，从发送方微信朋友圈保存到本地，图片变为1080x6596px，441.21k，好友微信对话中出现“查看原图（430K）”的选项，从好友朋友圈保存到本地，图片变为1080x6596px，430.87k。</p>
+<p>根据测试结果，可以看出，至少对于长图来讲，分享出去的图片尺寸没有经过微信压缩，肉眼看都是和原图没什么差别。那能不能直接使用<code>Intent.ACTION_SEND</code>的方式直接调起微信分享的界面来达到我们app的分享需求呢？能是能，只要知道微信的包名和微信分享界面的Activity信息，进行定向分享即可，但这种方式貌似无法得知分享的结果（怎么告知微信分享的来源？），而且保不准分享界面的Activity信息哪天就变了，不太满足我们项目需求。</p>
+<p>微信分享API中要调起的微信类信息如下（来自com.tencent.mm.opensdk.openapi.WXApiImplV10.class中sendReq(BaseReq var1)方法），微信可以根据appid进行回调，通知app分享结果：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">......</span><br><span class="line">Args var6;</span><br><span class="line">(var6 = <span class="keyword">new</span> Args()).bundle = var2;</span><br><span class="line">var6.content = <span class="string">"weixin://sendreq?appid="</span> + <span class="keyword">this</span>.appId;</span><br><span class="line">var6.targetPkgName = <span class="string">"com.tencent.mm"</span>;</span><br><span class="line">var6.targetClassName = <span class="string">"com.tencent.mm.plugin.base.stub.WXEntryActivity"</span>;</span><br><span class="line"><span class="keyword">return</span> MMessageActV2.send(<span class="keyword">this</span>.context, var6);</span><br></pre></td></tr></table></figure></p>
+<p>指定微信进行分享的代码如下(分享给微信好友)：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Intent intent = <span class="keyword">new</span> Intent();		</span><br><span class="line"><span class="comment">//朋友圈："com.tencent.mm.ui.tools.ShareToTimeLineUI"</span></span><br><span class="line"><span class="comment">//好友："com.tencent.mm.ui.tools.ShareImgUI"</span></span><br><span class="line">ComponentName comp = <span class="keyword">new</span> ComponentName(<span class="string">"com.tencent.mm"</span>,<span class="string">"com.tencent.mm.ui.tools.ShareImgUI"</span>);</span><br><span class="line">intent.setComponent(comp);</span><br><span class="line">intent.setAction(Intent.ACTION_SEND);</span><br><span class="line">intent.setType(<span class="string">"image/*"</span>);</span><br><span class="line">intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));<span class="comment">//uri为你要分享的图片的uri</span></span><br><span class="line">startActivity(intent);</span><br></pre></td></tr></table></figure></p>
+<h2 id="附：图片生成"><a href="#附：图片生成" class="headerlink" title="附：图片生成"></a>附：图片生成</h2><p>View相关图片的生成方式，可以通过canvas绘制到指定大小的Bitmap上，类似代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Bitmap <span class="title">takeViewScreenShort</span><span class="params">(View view)</span> </span>&#123;</span><br><span class="line">        Bitmap result = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.RGB_565);</span><br><span class="line">        Canvas canvas = <span class="keyword">new</span> Canvas(result);</span><br><span class="line">        view.draw(canvas);</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里还是要啰嗦下：Bitmap质量压缩不会影响Bitmap所占用的内存空间，Bitmap占用内存空间的计算方式始终是：占用内存 = 图片长度 <em> 图片宽度 </em> 单位像素占用的字节数。微信缩略图的处理一般既要使用尺寸压缩，又要使用质量压缩，以此限制thumbData长度。质量压缩会影响到该Bitmap保存到本地的文件大小。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2017/05/23/wechat_share_defact/">Android微信图片分享踩坑记录</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">mayongnan</a></p>
+        <p><span>发布时间:</span>2017-05-23, 17:00:00</p>
+        <p><span>最后更新:</span>2018-05-21, 10:17:44</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2017/05/23/wechat_share_defact/" title="Android微信图片分享踩坑记录">http://mayongnan.github.io/2017/05/23/wechat_share_defact/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://mayongnan.github.io/2017/05/23/wechat_share_defact/　　作者: mayongnan" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2017/03/16/mvc_mvp_mvvm/">
+                    Android中的MVC/MVP/MVVM框架模式
+                </a>
+            </div>
+        
+    </nav>
+
+  
+  
+    
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#问题描述"><span class="toc-text">问题描述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分析研究"><span class="toc-text">分析研究</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#使用微信API进行分享"><span class="toc-text">使用微信API进行分享</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-发送图片的二进制数据"><span class="toc-text">1. 发送图片的二进制数据</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-发送图片的本地路径"><span class="toc-text">2. 发送图片的本地路径</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#使用系统自带分享功能"><span class="toc-text">使用系统自带分享功能</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#附：图片生成"><span class="toc-text">附：图片生成</span></a></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"Android微信图片分享踩坑记录　| yon's blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+      <div class="duoshuo" id="comments">
+    <div id="comment-box" ></div>
+    <div class="ds-thread" id="ds-thread" data-thread-key="2017/05/23/wechat_share_defact/" data-title="Android微信图片分享踩坑记录" data-url="http://mayongnan.github.io/2017/05/23/wechat_share_defact/"></div>
+    <script>
+        var duoshuoQuery = {short_name:"mayongnan"};
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+            s.async = true; s.charset = 'UTF-8';
+            (d.head || d.body).appendChild(s);
+        }
+
+        
+    </script>
+    
+    <script> loadComment(); </script>
+
+</div>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2017/03/16/mvc_mvp_mvvm/" title="下一篇: Android中的MVC/MVP/MVVM框架模式">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/23/wechat_share_defact/">Android微信图片分享踩坑记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/16/mvc_mvp_mvvm/">Android中的MVC/MVP/MVVM框架模式</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/26/annotation_class/">Annotation系列之编译时注解使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/25/annotation_runtime/">Annotation系列之运行时注解使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/24/annotation_source/">Annotation系列之源码级注解使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/23/annotation_basic/">Annotation系列之基础篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/30/fragment_restore/">如何复用FragmentActivity被系统杀掉之前所保存的Fragment</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/05/hello_blog/">使用Hexo搭建Github博客</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2018 mayongnan
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

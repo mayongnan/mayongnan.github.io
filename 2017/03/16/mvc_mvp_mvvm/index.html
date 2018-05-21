@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="mayongnan" />
+
+
+
+<meta name="description" content="从Android的角度浅析MVC/MVP/MVVM框架模式">
+<meta name="keywords" content="MVC,MVP,MVVM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android中的MVC&#x2F;MVP&#x2F;MVVM框架模式">
+<meta property="og:url" content="http://mayongnan.github.io/2017/03/16/mvc_mvp_mvvm/index.html">
+<meta property="og:site_name" content="yon&#39;s blog">
+<meta property="og:description" content="从Android的角度浅析MVC/MVP/MVVM框架模式">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://mayongnan.github.io/blogfiles/20170315_MVC%20.png">
+<meta property="og:image" content="https://mayongnan.github.io/blogfiles/20170315_MVP.png">
+<meta property="og:image" content="https://mayongnan.github.io/blogfiles/20170315_MVVM.png">
+<meta property="og:updated_time" content="2018-05-21T02:17:44.022Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android中的MVC&#x2F;MVP&#x2F;MVVM框架模式">
+<meta name="twitter:description" content="从Android的角度浅析MVC/MVP/MVVM框架模式">
+<meta name="twitter:image" content="https://mayongnan.github.io/blogfiles/20170315_MVC%20.png">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="yon&#39;s blog" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.ico">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>Android中的MVC/MVP/MVVM框架模式 | yon&#39;s blog</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: true
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">mayongnan</a></h1>
+        </hgroup>
+
+        
+
+        
+            <form id="search-form">
+            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="false" />
+            <i class="fa fa-times" onclick="resetSearch()"></i>
+            </form>
+            <div id="local-search-result"></div>
+            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:myskyn@163.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/mayongnan" title="GitHub"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Activity回收/">Activity回收</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Android-Annotation/">Android Annotation</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Annotations/">Annotations</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Fragment复用/">Fragment复用</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Github-Blog/">Github Blog</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Hexo/">Hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MVC/">MVC</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MVP/">MVP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MVVM/">MVVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RetentionPolicy-CLASS/">RetentionPolicy.CLASS</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RetentionPolicy-RUNTIME/">RetentionPolicy.RUNTIME</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RetentionPolicy-SOURCE/">RetentionPolicy.SOURCE</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/微信分享/">微信分享</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/源码级注解/">源码级注解</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/编译时注解/">编译时注解</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/运行时注解/">运行时注解</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/长图分享/">长图分享</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">Android Developer</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">mayongnan</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">mayongnan</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:myskyn@163.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/mayongnan" title="GitHub"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-mvc_mvp_mvvm" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2017/03/16/mvc_mvp_mvvm/" class="article-date">
+      <time datetime="2017-03-16T13:14:19.000Z" itemprop="datePublished">2017-03-16</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android中的MVC/MVP/MVVM框架模式
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/技术随记/">技术随记</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MVC/">MVC</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MVP/">MVP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MVVM/">MVVM</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h2 id="架构、框架及设计模式"><a href="#架构、框架及设计模式" class="headerlink" title="架构、框架及设计模式"></a>架构、框架及设计模式</h2><p>关于架构、框架与设计模式之间的联系及区别，网上的答案五花八门，就连百度百科里的解释都很让人费解，百度百科里对“架构模式”的解释里提到MVC是一种架构模式，但在MVC的介绍里，是把MVC当成一种框架模式进行解释的，MVC是一种框架模式，但显然“框架”和“架构”不应该混为一谈。虽然百度百科本身就不具有专业性和权威性，但也从侧面反映出大家对于架构、框架以及设计模式之间的模糊认知，知乎上也有人发起提问：<a href="https://www.zhihu.com/question/31079945" target="_blank" rel="noopener">MVC到底是设计模式还是一种框架？</a>及<a href="https://www.zhihu.com/question/32105413" target="_blank" rel="noopener">架构、构架、结构、框架之间有什么区别？</a>。</p>
+<p>本人认为《<a href="http://blog.csdn.net/lfsf802/article/details/8487990" target="_blank" rel="noopener">架构、框架和设计模式关系</a>》及《<a href="http://blog.csdn.net/liuguobo/article/details/43451129" target="_blank" rel="noopener">架构和框架的区别</a>》两篇文章中论述的较有说服力。当然，相比于概念而言，我们更应该关注和学习的是这些概念背后处理问题的思想。</p>
+<blockquote>
+<p>架构应该是一个范畴最大的概念，是最高层次的设计。一个架构设计中可能会用到多个框架和多个设计模式；而框架是针对共性抽象出来的半成品，这里面可能包含着多个设计模式；而设计模式就是解决一类问题的设计思路和解决方法。——《<a href="http://blog.csdn.net/lfsf802/article/details/8487990" target="_blank" rel="noopener">架构、框架和设计模式关系</a>》</p>
+</blockquote>
+<blockquote>
+<p>框架和架构的关系可以总结为两句话：（1）为了尽早验证架构设计，或者处于支持产品线开发的目的，可以将关键的通用机制甚至整个架构以框架的方式进行实现；（2）业界（及公司内部）可能存在大量可供重用的框架，这些框架或者已经实现了软件架构所需的重要架构机制，或者为未来系统的某个子系统提供了可扩展的半成品，所以最终的软件架构可以借助这些框架构造。——《<a href="http://blog.csdn.net/liuguobo/article/details/43451129" target="_blank" rel="noopener">架构和框架的区别</a>》</p>
+</blockquote>
+<h2 id="MVC"><a href="#MVC" class="headerlink" title="MVC"></a>MVC</h2><p>MVC全称是Model-View-Controller即模型-视图-控制器，在1979年的时候由<a href="https://en.wikipedia.org/wiki/Trygve_Reenskaug" target="_blank" rel="noopener">TrygveReenskaug</a>提出，最早用于GUI开发。MVC是一个框架模式，它强制性的使应用程序的输入、处理和输出分开。使用MVC应用程序被分成三个核心部件：模型、视图、控制器。它们各自处理自己的任务,最典型的MVC就是JSP + servlet + javabean的模式。MVC分层有助于管理复杂的应用程序，因为我们可以在一个时间内专门关注一个方面。例如，我们可以在不依赖业务逻辑的情况下专注于视图设计。同时也让应用程序的测试更加容易。</p>
+<p>Java Web中MVC（<a href="http://www.cnblogs.com/end/archive/2011/06/02/2068512.html" target="_blank" rel="noopener">主动型MVC</a>）的图示如下：<br><img src="https://mayongnan.github.io/blogfiles/20170315_MVC%20.png" alt="MVC"><br><code>Model</code>：在MVC的三个部件中，模型拥有最多的处理任务，也是MVC的核心。模型持有所有的数据、状态和程序逻辑。模型独立于视图和控制器。</p>
+<p><code>View</code>：视图是用户看到并与之交互的界面，如就是html页面。</p>
+<p><code>Controller</code>：定义用户界面对用户输入的响应方式，负责把用户的请求转化为对 模型的操作。它只是接收请求并决定调用哪个模型构件去处理请求，然后再确定用哪个视图来显示返回的数据。</p>
+<p>对于MVC似乎也没有明确的定义，前端、后端等不同平台的框架对于MVC的定义也不尽相同，要完全理解MVC并不是很容易。在MVC里，View是可以直接访问Model的，例如在jsp页面上，可以嵌套Java代码，这样在View上就可以越过Controller访问Model了，从而，View里会包含Model信息，不可避免的还要包括一些业务逻辑。在MVC模型里，Model不依赖于View，但是View是依赖于Model的。不仅如此，因为有一些业务逻辑在View里实现了，导致要更改View也是比较困难的，至少那些业务逻辑是无法重用的，因为这部分不是公用的Model了，其他View不能使用这个View里面的代码。而在MVC中View会从直接Model中读取数据而不是通过<br>Controller。所以MVC中模型与视图并没有完全分离。而且控制层和表现层有时会过于紧密，导致没有真正分离和重用。</p>
+<p>Android中的“MVC”结构由framework给我们搭建好并提供给我们的，View层采用XML文件进行界面描述，Model大多对应于本地的数据文件或网络获取的数据体及这些数据的处理，Controller由Activity承担，控制器Activity将视图View和模型Model进行分离，并让二者在Activity中进行绑定或完成其他逻辑。但是在这套“MVC”体系中，View的功能太弱，导致我们要把处理View的逻辑写到Activity中，如Dialog的显示，导致Activity即充当了Cotroller又充当了View的部分角色，不利于测试及代码复用，所以有些人认为这套“MVC”是一个Model-View的结构。</p>
+<h3 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h3><p>分层，结构清晰，耦合性低，大型项目代码的复用性得到极大的提高，开发人员分工明确，提高了开发的效率，维护方便，降低了维护成本。</p>
+<h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h3><p>简单的小型项目，使用MVC设计反而会降低开发效率，层和层虽然相互分离，但是之间关联性太强，没有做到独立的重用。</p>
+<h2 id="MVP"><a href="#MVP" class="headerlink" title="MVP"></a>MVP</h2><p>MVP是从MVC模式演变而来，MVP的全称为Model-View-Presenter，Model提供数据，View负责显示，Controller/Presenter负责逻辑的处理。MVP与MVC有着一个重大的区别：在MVP中View并不直接使用Model，它们之间的通信是通过Presenter (MVC中的Controller)来进行的，所有的交互都发生在Presenter内部，而在MVC中View会直接从Model中读取数据而不是通过 Controller。</p>
+<p>MVP模式的图示如下：<br><img src="https://mayongnan.github.io/blogfiles/20170315_MVP.png" alt="MVP"><br><code>Model</code>：负责存储、检索、操纵数据。</p>
+<p><code>View</code>：负责绘制UI元素、与用户进行交互。</p>
+<p><code>Presenter</code>：作为View与Model交互的中间纽带，处理与用户交互的负责逻辑。</p>
+<p>MVP模式可以让UI界面和数据分离，我们的应用至少可以分为3层，这样使得我们也可以对这三层进行独立的单元测试。MVP并不是一个标准化的模式，它有很多种实现方式。</p>
+<p>在Android开发中，主流的思想是把Activity、Fragment作为View角色看待，如<a href="https://github.com/googlesamples/android-architecture" target="_blank" rel="noopener">谷歌sample</a>、<a href="http://hannesdorfmann.com/mosby/mvp/" target="_blank" rel="noopener">Mosby</a>、<a href="https://github.com/antoniolg/androidmvp" target="_blank" rel="noopener">AndroidMVP</a>等，因为Activity、Fragment更像是一个<code>ViewController</code>，View相关的逻辑都应该放到View层而不是Presenter层，这显然是比较合理的。</p>
+<p>但也有一部分人将Activity、Fragment当成Presenter来处理，如<a href="https://github.com/qibin0506/MVPro" target="_blank" rel="noopener">MVPro</a>、<a href="https://github.com/kymjs/TheMVP" target="_blank" rel="noopener">TheMVP</a>等。因为activity 有一个很复杂的生命周期（fragment生命周期更为复杂）, 而这些生命周期很有可能对你项目的业务逻辑有非常重大的影响。 Activity可以获取上下文环境和多种android系统服务， Activity之间进行数据的传递、启动Service和执行FragmentTransaction等不应该是视图层应该涉及的领域。</p>
+<h3 id="优点-1"><a href="#优点-1" class="headerlink" title="优点"></a>优点</h3><p>易于维护、易于测试、松耦合、复用性高、健壮稳定易于拓展</p>
+<h3 id="缺点-1"><a href="#缺点-1" class="headerlink" title="缺点"></a>缺点</h3><p>➣ Presenter层与View层通过接口进行交互，接口粒度不好控制。粒度太小，就会存在大量接口的情况，使代码太过碎版化；粒度太大，解耦效果不好。同时对于UI的输入和数据的变化，需要手动调用V层或者P层相关的接口，相对来说缺乏自动性、监听性。</p>
+<p>➣ 主流的MVP是以UI为驱动的模型，更新UI都需要保证能获取到控件的引用，更新UI的时候要考虑当前是否在UI线程以及Activity的生命周期。数据是被动的通过UI控件做展示，如果数据的变化能够自动响应到UI将让我们的开发更高效。</p>
+<p>➣ V层与P层有一定的耦合度，一旦V层某个UI元素更改，那么对应的接口可能就必须得改，数据如何映射到UI上、事件监听接口这些可能都需要转变，牵一发而动全身。</p>
+<h2 id="MVVM"><a href="#MVVM" class="headerlink" title="MVVM"></a>MVVM</h2><p>MVVM最早于 2005 年被微软的 WPF 和 Silverlight 的架构师 John Gossman 提出，并且应用在微软的软件开发中。MVVM 在使用当中，通常会利用双向绑定技术，使得 Model 变化时，ViewModel 会自动更新，而 ViewModel 变化时，View 也会自动变化。所以，MVVM 模式有些时候又被称作：model-view-binder 模式。MVVM与MVP很相似，都将Model和View层进行了分离，只是Presenter变成了ViewModel，同时它采用双向绑定（data-binding）：View的变动，自动反映在 ViewModel，反之亦然。</p>
+<p>MVVM模式的图示如下：<br><img src="https://mayongnan.github.io/blogfiles/20170315_MVVM.png" alt="MVVM"></p>
+<p>2015年Google IO 大会上，Android 团队发布了数据绑定框架（Data Binding Library），从而提供了对MVVM模式的支持。ViewModel在改变内容之后通知binding framework内容发生了改变，然后framework自动更新和那些内容绑定的view。因为数据和业务逻辑处于一个独立的ViewModel中，ViewModel只需要关注数据和业务逻辑，不需要和UI或者控件打交道。UI想怎么处理数据都由UI自己决定，ViewModel不涉及任何和UI相关的事，也不持有UI控件的引用。Data Binding帮助我们一定程度上提升了开发效率，性能更高（甚至超越手写代码）并且具有强大的表达式支持。</p>
+<h3 id="优点-2"><a href="#优点-2" class="headerlink" title="优点"></a>优点</h3><p>➣ 数据驱动：在常规的开发模式中，数据变化需要更新UI的时候，需要先获取UI控件的引用，然后再更新UI。获取用户的输入和操作也需要通过UI控件的引用。在MVVM中，这些都是通过数据驱动来自动完成的，数据变化后会自动更新UI，UI的改变也能自动反馈到数据层，数据成为主导因素。这样MVVM层在业务逻辑处理中只要关心数据，不需要直接和UI打交道，在业务处理过程中简单方便很多。</p>
+<p>➣ 低耦合：数据和业务逻辑处于一个独立的ViewModel中，ViewModel只需要关注数据和业务逻辑，不需要和UI或者控件打交道。UI想怎么处理数据都由UI自己决定，ViewModel不涉及任何和UI相关的事，也不持有UI控件的引用。即便是控件改变了（比如：TextView换成EditText），ViewModel也几乎不需要更改任何代码。它非常完美的解耦了View层和ViewModel，解决了上面我们所说的MVP的痛点。</p>
+<p>➣ UI更新：在MVVM中，数据发生变化后，我们在工作线程直接修改（在数据是线程安全的情况下）ViewModel的数据即可，不用再考虑要切到主线程更新UI了，这些事情相关框架都帮我们做了。</p>
+<p>➣ 团队协作：MVVM的分工是非常明显的，由于View和ViewModel之间是松散耦合的：一个是处理业务和数据、一个是专门的UI处理。所以，完全由两个人分工来做，一个做UI（XML和Activity）一个写ViewModel，效率更高。</p>
+<p>➣ 可复用：一个ViewModel可以复用到多个View中。同样的一份数据，可以提供给不同的UI去做展示。对于版本迭代中频繁的UI改动，更新或新增一套View即可。如果想在UI上做A/B Testing，那MVVM是你不二选择。</p>
+<p>➣ 单元测试：前面说过，ViewModel层做的事是数据处理和业务逻辑，View层中关注的是UI，两者完全没有依赖。不管是UI的单元测试还是业务逻辑的单元测试，都是低耦合的。在MVVM中数据是直接绑定到UI控件上的（部分数据是可以直接反映出UI上的内容），那么我们就可以直接通过修改绑定的数据源来间接做一些Android UI上的测试。</p>
+<h3 id="缺点-2"><a href="#缺点-2" class="headerlink" title="缺点"></a>缺点</h3><p>➣ 对于过大的项目，数据绑定需要花费更多的内存。</p>
+<p>➣ 使用apt等技术动态生成代码，对于自定View需要借助注解写一些辅助代码才能实现绑定，View中使用的变量和具体类没有直接关联，可能要在编译的时候才能发现View中使用变量的属性名称有误。</p>
+<p>➣ xml与ViewModel绑定，可能会影响xml布局复用性。</p>
+<hr>
+<p>&emsp;&emsp;讨论框架模式的目的是让我们能够从中获得启发，写出易于测试、复用率高、耦合度低、拓展性强且易于阅读的健壮型代码结构。对于设计模式我们应该理性对待，举个例子：谷歌的<a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp/" target="_blank" rel="noopener">todo-mvp sample</a> 中有个打开任务详情界面的实现，首先在Fragment的onTaskClick方法中调用Presenter的openTaskDetails方法，然后在Presenter的openTaskDetails方法中调用Fragment中的showTaskDetailsUi方法，从MVP的分工来讲确实合情合理，但一个简单的打开Activity界面的操作要写这么多代码可能就显得有些繁琐了。其实MV*的思想都是进行解耦隔离视图（View）和模型（Model），在实际的应用中不需要给MVC、MVP和MVVM一个明确的界限,甚至可以把几者融合在一起，无形胜有形。</p>
+<hr>
+<p><strong>参考</strong><br><em>【1】<a href="http://www.cnblogs.com/greatfish/p/6024946.html" target="_blank" rel="noopener">Java中MVC详解以及优缺点总结</a><br>【2】《Android源码设计模式解析与实战》<br>【3】<a href="http://www.ruanyifeng.com/blog/2015/02/mvcmvp_mvvm.html" target="_blank" rel="noopener">MVC，MVP 和 MVVM 的图示</a><br>【4】<a href="http://www.infoq.com/cn/articles/rethinking-mvc-mvvm/" target="_blank" rel="noopener">被误解的MVC和被神化的MVVM</a><br>【5】<a href="http://www.androidchina.net/6329.html" target="_blank" rel="noopener">如何构建Android MVVM 应用框架</a></em></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2017/03/16/mvc_mvp_mvvm/">Android中的MVC/MVP/MVVM框架模式</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">mayongnan</a></p>
+        <p><span>发布时间:</span>2017-03-16, 21:14:19</p>
+        <p><span>最后更新:</span>2018-05-21, 10:17:44</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2017/03/16/mvc_mvp_mvvm/" title="Android中的MVC/MVP/MVVM框架模式">http://mayongnan.github.io/2017/03/16/mvc_mvp_mvvm/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://mayongnan.github.io/2017/03/16/mvc_mvp_mvvm/　　作者: mayongnan" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2017/05/23/wechat_share_defact/">
+                    Android微信图片分享踩坑记录
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2017/01/26/annotation_class/">
+                    Annotation系列之编译时注解使用
+                </a>
+            </div>
+        
+    </nav>
+
+  
+  
+    
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#架构、框架及设计模式"><span class="toc-text">架构、框架及设计模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MVC"><span class="toc-text">MVC</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#优点"><span class="toc-text">优点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缺点"><span class="toc-text">缺点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MVP"><span class="toc-text">MVP</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#优点-1"><span class="toc-text">优点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缺点-1"><span class="toc-text">缺点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MVVM"><span class="toc-text">MVVM</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#优点-2"><span class="toc-text">优点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缺点-2"><span class="toc-text">缺点</span></a></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"Android中的MVC/MVP/MVVM框架模式　| yon's blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+      <div class="duoshuo" id="comments">
+    <div id="comment-box" ></div>
+    <div class="ds-thread" id="ds-thread" data-thread-key="2017/03/16/mvc_mvp_mvvm/" data-title="Android中的MVC/MVP/MVVM框架模式" data-url="http://mayongnan.github.io/2017/03/16/mvc_mvp_mvvm/"></div>
+    <script>
+        var duoshuoQuery = {short_name:"mayongnan"};
+        var loadComment = function(){
+            var d = document, s = d.createElement('script');
+            s.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+            s.async = true; s.charset = 'UTF-8';
+            (d.head || d.body).appendChild(s);
+        }
+
+        
+    </script>
+    
+    <script> loadComment(); </script>
+
+</div>
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2017/05/23/wechat_share_defact/" title="上一篇: Android微信图片分享踩坑记录">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2017/01/26/annotation_class/" title="下一篇: Annotation系列之编译时注解使用">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/05/23/wechat_share_defact/">Android微信图片分享踩坑记录</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/03/16/mvc_mvp_mvvm/">Android中的MVC/MVP/MVVM框架模式</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/26/annotation_class/">Annotation系列之编译时注解使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/25/annotation_runtime/">Annotation系列之运行时注解使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/24/annotation_source/">Annotation系列之源码级注解使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/01/23/annotation_basic/">Annotation系列之基础篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/12/30/fragment_restore/">如何复用FragmentActivity被系统杀掉之前所保存的Fragment</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/05/hello_blog/">使用Hexo搭建Github博客</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2018 mayongnan
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+    <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';                 
+    }       
+});
+</script>
+
+<script src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>
